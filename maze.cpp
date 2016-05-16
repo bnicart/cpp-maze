@@ -7,7 +7,7 @@
   #include <stdlib.h>
 #endif
 
-#define SIZE 20
+#define SIZE 30
 
 char maze[SIZE][SIZE];
 char facing = 'F';
@@ -16,7 +16,8 @@ struct POSITION {
   int x;
   int y;
   char face;
-};
+  char base;
+} currPos, endPos;
 
 void createStartEndPoints() {
   
@@ -31,6 +32,16 @@ void createStartEndPoints() {
   }
   maze[sp][0] = '>';
   maze[ep][SIZE-1] = '_';
+
+  endPos.x = ep;
+  endPos.y = SIZE-1;
+  endPos.face = '_';
+  endPos.base = '_';
+
+  currPos.x = sp;
+  currPos.y = 0;
+  currPos.face = '>';
+  currPos.base = '>';
 }
 
 void generateMaze() {
@@ -45,7 +56,7 @@ void generateMaze() {
   }
   srand(time(NULL));
 
-  for( int a = 0 ; a < SIZE*5 ; a++ ) {
+  for( int a = 0 ; a < SIZE*8 ; a++ ) {
       maze[rand()%SIZE][rand()%SIZE] = '#';
   }
 
@@ -66,26 +77,26 @@ bool isTraversable(int x, int y) {
 }
 
 POSITION getCurrentPosition() {
-  POSITION pos;
-  for( int a = 0 ; a < SIZE ; a++ ) {
-    for( int b = 0 ; b < SIZE ; b++ ) {
-      if( maze[a][b] == '>' ||
-          maze[a][b] == '^' ||
-          maze[a][b] == '<' ||
-          maze[a][b] == 'v' ) {
-        pos.x = a;
-        pos.y = b;
-        pos.face = maze[a][b];
-      }
-    }
-  }
-  return pos;
+  /* POSITION pos; */
+  /* for( int a = 0 ; a < SIZE ; a++ ) { */
+  /*   for( int b = 0 ; b < SIZE ; b++ ) { */
+  /*     if( maze[a][b] == '>' || */
+  /*         maze[a][b] == '^' || */
+  /*         maze[a][b] == '<' || */
+  /*         maze[a][b] == 'v' ) { */
+  /*       pos.x = a; */
+  /*       pos.y = b; */
+  /*       pos.face = maze[a][b]; */
+  /*     } */
+  /*   } */
+  /* } */
+  return currPos;
 }
 
-POSITION getNextPosition( POSITION currPos ) {
-  POSITION nextPos = currPos;
+POSITION getNextPosition( POSITION tempCurrPos ) {
+  POSITION nextPos = tempCurrPos;
   
-  if( nextPos.face == '>' ) {
+  if( currPos.base == '>' ) {
     /* if( isTraversable( nextPos.x, nextPos.y+1) ) { */
     /*   nextPos.y++; */
     /* } */ 
@@ -93,12 +104,14 @@ POSITION getNextPosition( POSITION currPos ) {
     if( isTraversable( nextPos.x+1, nextPos.y ) ) {
       nextPos.x++;
       nextPos.face = 'v';
+      nextPos.base = 'v';
     }
     else {
-      nextPos.face = '^';
+      nextPos.base = '^';
+      nextPos.face = '>';
     }
   }
-  else if( nextPos.face == '^' ) {
+  else if( currPos.base == '^' ) {
     /* if( isTraversable( nextPos.x-1, nextPos.y ) ){ */
     /*   nextPos.x--; */
     /* } */
@@ -106,12 +119,14 @@ POSITION getNextPosition( POSITION currPos ) {
     if( isTraversable( nextPos.x, nextPos.y+1 ) ) {
       nextPos.y++;
       nextPos.face = '>';
+      nextPos.base = '>';
     }
     else {
-      nextPos.face = '<';
+      nextPos.base = '<';
+      nextPos.face = '^';
     }
   }
-  else if( nextPos.face == '<' ) {
+  else if( currPos.base == '<' ) {
     /* if( isTraversable( nextPos.x, nextPos.y-1 ) ) { */
     /*   nextPos.y--; */
     /* } */
@@ -119,11 +134,13 @@ POSITION getNextPosition( POSITION currPos ) {
     if( isTraversable( nextPos.x-1, nextPos.y ) ) {
       nextPos.x--;
       nextPos.face = '^';
+      nextPos.base = '^';
     } else {
-      nextPos.face = 'v';
+      nextPos.base = 'v';
+      nextPos.face = '<';
     }
   }
-  else if( nextPos.face == 'v' ) {
+  else if( currPos.base == 'v' ) {
     /* if( isTraversable( nextPos.x+1, nextPos.y ) ) { */
     /*   nextPos.x++; */
     /* } */
@@ -131,8 +148,10 @@ POSITION getNextPosition( POSITION currPos ) {
     if( isTraversable( nextPos.x, nextPos.y-1 ) ) {
       nextPos.y--;
       nextPos.face = '<';
+      nextPos.base = '<';
     } else {
-      nextPos.face = '>';
+      nextPos.base = '>';
+      nextPos.face = 'v';
     }
   }
 
@@ -140,17 +159,17 @@ POSITION getNextPosition( POSITION currPos ) {
 }
 
 POSITION getEndPosition() {
-  POSITION pos;
-  for( int a = 0 ; a < SIZE ; a++ ) {
-    for( int b = 0 ; b < SIZE ; b++ ) {
-      if( maze[a][b] == '_') {
-        pos.x = a;
-        pos.y = b;
-      }
-    }
-  }
-  pos.face = '>';
-  return pos;
+  /* POSITION pos; */
+  /* for( int a = 0 ; a < SIZE ; a++ ) { */
+  /*   for( int b = 0 ; b < SIZE ; b++ ) { */
+  /*     if( maze[a][b] == '_') { */
+  /*       pos.x = a; */
+  /*       pos.y = b; */
+  /*     } */
+  /*   } */
+  /* } */
+  /* pos.face = '>'; */
+  return endPos;
 }
 
 void move( POSITION currPos, POSITION nextPos ) {
@@ -164,8 +183,9 @@ void traverseMaze() {
     POSITION tempCurr = getCurrentPosition();
     POSITION tempNext = getNextPosition(tempCurr); 
     move( tempCurr, tempNext );
+    currPos = tempNext;
     printMaze();
-    printf("CPos: (%d, %d)\nEPos: (%d, %d)\n\n", getCurrentPosition().x, getCurrentPosition().y, getEndPosition().x, getEndPosition().y);
+    /* printf("CPos: (%d, %d)\nEPos: (%d, %d)\n\n", getCurrentPosition().x, getCurrentPosition().y, getEndPosition().x, getEndPosition().y); */
     usleep(50*1000);
     /* sleep(1); */
   }
