@@ -1,0 +1,11 @@
+#include "iostream"
+#ifdef __cplusplus__
+  #include <cstdlib>
+#else
+  #include <stdlib.h>
+#endif
+
+int main() {
+  system("clear");
+  return 0;
+}

@@ -1,0 +1,3 @@
+filename=$(echo $1 | awk -F . '{print $1}')
+echo "Compiling & Processing" $filename
+g++ $1 -o $filename && ./$filename
